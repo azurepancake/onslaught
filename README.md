@@ -1,5 +1,7 @@
 # onslaught
 
+A verticle scrolling, space themed shoot-em up written in Python with Pygame.
+
 To do:
 
 -Add more control over what types of enemies fire and the frequency of it
