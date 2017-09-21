@@ -17,6 +17,17 @@ class Game(object):
 		self.STAGETWO = pygame.USEREVENT + 6
 		self.STAGETHREE = pygame.USEREVENT + 7
 
+        def mainLoop(self):
+                self.clock = pygame.time.Clock()
+                self.queueStageEvents()
+                self.loadSprites()
+                while 1:
+                        self.clock.tick(self.framerate)
+                        self.getEvents()
+                        self.draw()
+                        self.collisionCheck()
+
+
 	def loadSprites(self):
 		global laserSprites
 		global enemyLaserSprites
@@ -111,16 +122,6 @@ class Game(object):
                 pygame.time.set_timer(self.SPWNGRUNTFORM, 6000)
                 pygame.time.set_timer(self.SPWNBOMBER, 3000)
                 self.player.powerup = "none"
-
-	def mainLoop(self):
-		self.clock = pygame.time.Clock()
-		self.queueStageEvents()
-		self.loadSprites()
-		while 1:
-			self.clock.tick(self.framerate)
-			self.getEvents()
-			self.draw()
-			self.collisionCheck()
 
 	def spawnAsteroid(self):
                 graphics = 'asteroid.png'
