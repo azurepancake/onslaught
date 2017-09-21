@@ -27,7 +27,6 @@ class Game(object):
                         self.draw()
                         self.collisionCheck()
 
-
 	def loadSprites(self):
 		global laserSprites
 		global enemyLaserSprites
