@@ -68,24 +68,33 @@ class Game(object):
 
 	def draw(self):
 		self.screen.fill((0, 0, 0))
+
 		self.playerSprites.draw(self.screen)
-		self.playerSprites.update()
 		self.enemySprites.draw(self.screen)
-		self.enemySprites.update()
 		self.debrisSprites.draw(self.screen)
-		self.debrisSprites.update()
 		laserSprites.draw(self.screen)
-		laserSprites.update()
 		enemyLaserSprites.draw(self.screen)
+
+		self.playerSprites.update()
+		self.enemySprites.update()
+		self.debrisSprites.update()
+		laserSprites.update()
 		enemyLaserSprites.update()
+
 		pygame.display.flip()
 
 	# Define Stages
+        def queueStageEvents(self):
+                pygame.time.set_timer(self.STAGEONE, 1000)
+                #pygame.time.set_timer(self.STAGETWO, 30000)
+                #pygame.time.set_timer(self.STAGETHREE, 60000)
+
+
 	def stageOne(self):
 		print("STAGE 1. GO!")
 		pygame.time.set_timer(self.STAGEONE, 0)
-		pygame.time.set_timer(self.SPWNGRUNT, 600)
-		pygame.time.set_timer(self.SPWNGRUNTFORM, 5000)
+		#pygame.time.set_timer(self.SPWNGRUNT, 1300)
+		pygame.time.set_timer(self.SPWNGRUNTFORM, 3000)
 
 	def stageTwo(self):
 		print("STAGE 2. GO!")
@@ -102,11 +111,6 @@ class Game(object):
                 pygame.time.set_timer(self.SPWNGRUNTFORM, 6000)
                 pygame.time.set_timer(self.SPWNBOMBER, 3000)
                 self.player.powerup = "none"
-
-	def queueStageEvents(self):
-		pygame.time.set_timer(self.STAGEONE, 1000)
-		pygame.time.set_timer(self.STAGETWO, 30000)
-		pygame.time.set_timer(self.STAGETHREE, 60000)
 
 	def mainLoop(self):
 		self.clock = pygame.time.Clock()
@@ -150,7 +154,7 @@ class Game(object):
 		graphics = ['grunt1.gif', 'laser1.bmp']
 		projectile = "lasers"
 		xvelocity = 0
-		yvelocity = random.randint(3, 4)
+		yvelocity = 3
 		xposition = random.randint(50, 350)
 		yposition = 0
 		self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, True, "single"))
@@ -159,7 +163,7 @@ class Game(object):
 		graphics = ['grunt2.png', 'laser1.bmp']
 		projectile = "lasers"
 		xvelocity = 0
-		yvelocity = random.randint(3, 4)
+		yvelocity = 3
 
 		# Back-to-Back Formation
 		if formation == 0:
@@ -174,8 +178,8 @@ class Game(object):
 
 		# Side-to-Side Formation
 		if formation == 1:
-			distance = 30
-			xposition = random.randint(25, 200)
+			distance = 55
+			xposition = 5
 			yposition = -10
 			i = 0
 			while i <= amount:
@@ -256,7 +260,7 @@ class Player(pygame.sprite.Sprite):
 			laserSprites.add(Projectile(self.rect.center, self.yLaserVelocity, 3, self.projectile))
 
 	def reset(self):
-                self.rect.centerx = 300
+                self.rect.centerx = 200
                 self.rect.centery = 535
 
 class Projectile(pygame.sprite.Sprite):
@@ -272,20 +276,6 @@ class Projectile(pygame.sprite.Sprite):
 			self.kill()
 		else:
 			self.rect.move_ip(self.xvelocity, self.yvelocity)	
-
-class HomingLaser(pygame.sprite.Sprite):
-	def __init__(self, xposition, yposition, graphics, xPlayerPosition, yPlayerPosition):
-		pygame.sprite.Sprite.__init__(self)
-		self.graphics = graphics
-		self.image, self.rect = loadImage(self.graphics)
-		self.rect.centerx = xposition
-		self.rect.centery = yposition
-		self.xPlayerPosition = xPlayerPosition
-		self.yPlayerPosition = yPlayerPosition
-
-	def update(self):
-		xdirection = self.xPlayerPosition - self.rect.centerx
-		
 	
 class Debris(pygame.sprite.Sprite):
 	def __init__(self, xposition, yposition, xvelocity, yvelocity, graphics):
