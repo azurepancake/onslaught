@@ -1,4 +1,4 @@
-import os, sys, random, pygame
+import os, sys, random, pygame, math
 from pygame.locals import *
 
 def loadImage(name, colorkey=None):

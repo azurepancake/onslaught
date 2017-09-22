@@ -103,8 +103,8 @@ class Game(object):
 	def stageOne(self):
 		print("STAGE 1. GO!")
 		pygame.time.set_timer(self.STAGEONE, 0)
-		#pygame.time.set_timer(self.SPWNGRUNT, 1300)
-		pygame.time.set_timer(self.SPWNGRUNTFORM, 3000)
+		pygame.time.set_timer(self.SPWNGRUNT, 1300)
+		#pygame.time.set_timer(self.SPWNGRUNTFORM, 3000)
 
 	def stageTwo(self):
 		print("STAGE 2. GO!")
@@ -142,13 +142,18 @@ class Game(object):
 		yvelocity = 0
 		yposition = random.randint(50, 350)
 		direction = random.randint(0, 1)
+                weaponEquiped = True
+                weaponStyle = "single"
+                movementStyle = "straight"
+
 		if direction == 0:
 			xvelocity = random.randint(2, 3)
 			xposition = 0
 		if direction == 1:
 			xvelocity = random.randint(-3, -2)
 			xposition = 400
-		self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, True, "single"))
+	
+		self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 
 	def spawnGrunt(self):
 		graphics = ['grunt1.gif', 'laser1.bmp']
@@ -156,24 +161,32 @@ class Game(object):
 		xvelocity = 0
 		yvelocity = 3
 		xposition = random.randint(50, 350)
-		yposition = 0
-		self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, True, "single"))
+		yposition = -50
+		weaponEquiped = True
+		weaponStyle = "single"
+		movementStyle = "sine"
+
+		self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 
 	def spawnGruntFormation(self, amount, formation):
 		graphics = ['grunt2.png', 'laser1.bmp']
 		projectile = "lasers"
 		xvelocity = 0
 		yvelocity = 3
+		formation = 0
 
 		# Back-to-Back Formation
 		if formation == 0:
 			distance = -35
-			xposition = random.randint(50, 350)
+			xposition = 0
 			yposition = distance
+			weaponEquiped = False
+			weaponStyle = "single"
+			movementStyle = "sine"
 			i = 0
 			while i <= amount:
 				yposition += distance
-				self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, False, "spray"))
+				self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 				i += 1
 
 		# Side-to-Side Formation
@@ -181,10 +194,13 @@ class Game(object):
 			distance = 55
 			xposition = 5
 			yposition = -10
+                        weaponEquiped = True
+                        weaponStyle = "spray"
+                        movementStyle = "straight"
 			i = 0
 			while i <= amount:
 				xposition += distance
-				self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, True, "spray"))
+				self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 				i += 1
 
 		# Slash Formation			
@@ -192,11 +208,14 @@ class Game(object):
                         distance = 50
                         xposition = 25
                         yposition = -10
+                        weaponEquiped = True
+                        weaponStyle = "spray"
+                        movementStyle = "straight"
                         i = 0
                         while i <= amount:
                                 xposition += distance
 				yposition -= distance
-                                self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, True, "spray"))
+				self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
                                 i += 1
 
 	def collisionCheck(self):
@@ -297,12 +316,14 @@ class Debris(pygame.sprite.Sprite):
 		self.float()
 
 class Grunt(pygame.sprite.Sprite):
-	def __init__(self, xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquipped, fireType):
+	def __init__(self, xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquipped, fireType, movementStyle):
 		pygame.sprite.Sprite.__init__(self)
 		self.graphics = graphics
 		self.image, self.rect = loadImage(self.graphics[0])
-		self.rect.centerx = xposition
-		self.rect.centery = yposition
+		#self.rect.centerx = xposition
+		#self.rect.centery = yposition
+		self.xposition = xposition
+		self.yposition = yposition
 		self.xvelocity = xvelocity
 		self.yvelocity = yvelocity
 		self.projectile = projectile
@@ -312,6 +333,9 @@ class Grunt(pygame.sprite.Sprite):
 		self.weaponCharge = 0
 		self.weaponEquipped = weaponEquipped
 		self.fireType = fireType
+		self.movementStyle = movementStyle
+		self.step = 0
+		self.amplitude = 50
 
 		if self.weaponEquipped:
 			if self.projectile == "lasers":
@@ -351,8 +375,20 @@ class Grunt(pygame.sprite.Sprite):
 	def fly(self):
                 if self.rect.top > 600 or self.rect.right < -20 or self.rect.left > 420:
                         self.kill()
-                else:
+
+                elif self.movementStyle == "straight":
                         self.rect.move_ip(self.xvelocity, self.yvelocity)
+
+		elif self.movementStyle == "sine":
+			print("Y Position: %d" % self.rect.centery)
+			print("X Position: %d" % self.rect.centerx)
+			xposition = 1 * math.sin(self.step) * self.amplitude
+			self.yposition += 3
+			self.rect.center = (int(xposition) + 200 + 20, int(self.yposition))
+			#self.rect.move_ip(self.xvelocity, self.yvelocity)
+			#self.step += 0.008
+			self.step += 0.09
+			self.step %= 2 * math.pi
 
 	def update(self):
 		self.fly()
