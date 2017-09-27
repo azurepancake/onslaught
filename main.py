@@ -9,13 +9,16 @@ class Game(object):
 		self.screen = pygame.display.set_mode((self.width, self.height))
 
 		# User Event Declaration
-		self.SPWNGRUNT = pygame.USEREVENT + 1
-		self.SPWNGRUNTFORM = pygame.USEREVENT + 2
-		self.SPWNBOMBER = pygame.USEREVENT + 3
-		self.SPWNASTEROID = pygame.USEREVENT + 4
-		self.STAGEONE = pygame.USEREVENT + 5
-		self.STAGETWO = pygame.USEREVENT + 6
-		self.STAGETHREE = pygame.USEREVENT + 7
+		self.SPWNGRUNT = pygame.USEREVENT + 0
+		self.SPWNGRUNTFORM = pygame.USEREVENT + 1
+		self.SPWNBOMBER = pygame.USEREVENT + 2
+		self.SPWNASTEROID = pygame.USEREVENT + 3
+		self.STAGEONE = pygame.USEREVENT + 4
+		self.STAGETWO = pygame.USEREVENT + 5
+		self.STAGETHREE = pygame.USEREVENT + 6
+		self.STAGEFOUR = pygame.USEREVENT + 7
+		self.STAGEFIVE = pygame.USEREVENT + 8
+		self.STAGESIX = pygame.USEREVENT + 9
 
         def mainLoop(self):
                 self.clock = pygame.time.Clock()
@@ -64,6 +67,10 @@ class Game(object):
 				self.stageTwo()
 			if event.type == self.STAGETHREE:
 				self.stageThree()
+			if event.type == self.STAGEFOUR:
+				self.stageFour()
+			if event.type == self.STAGEFIVE:
+				self.stageFive()
 
 		# Player Movement Events
 		key = pygame.key.get_pressed()
@@ -96,31 +103,34 @@ class Game(object):
 	# Define Stages
         def queueStageEvents(self):
                 pygame.time.set_timer(self.STAGEONE, 1000)
-                #pygame.time.set_timer(self.STAGETWO, 30000)
-                #pygame.time.set_timer(self.STAGETHREE, 60000)
-
+                pygame.time.set_timer(self.STAGETWO, 30000)
+                pygame.time.set_timer(self.STAGETHREE, 60000)
+		pygame.time.set_timer(self.STAGEFOUR, 90000)
+		pygame.time.set_timer(self.STAGEFIVE, 150000)
 
 	def stageOne(self):
 		print("STAGE 1. GO!")
 		pygame.time.set_timer(self.STAGEONE, 0)
-		pygame.time.set_timer(self.SPWNGRUNT, 1300)
-		#pygame.time.set_timer(self.SPWNGRUNTFORM, 3000)
+		pygame.time.set_timer(self.SPWNGRUNT, 600)
 
 	def stageTwo(self):
 		print("STAGE 2. GO!")
 		pygame.time.set_timer(self.STAGETWO, 0)
-		pygame.time.set_timer(self.SPWNGRUNT, 300)
-		pygame.time.set_timer(self.SPWNGRUNTFORM, 2000)
-		pygame.time.set_timer(self.SPWNBOMBER, 2000)
-		self.player.powerup = "spray"
+		pygame.time.set_timer(self.SPWNGRUNT, 0)
+		pygame.time.set_timer(self.SPWNGRUNTFORM, 2500)
 
 	def stageThree(self):
+		print("STAGE 3. GO!")
                 pygame.time.set_timer(self.STAGETHREE, 0)
-                pygame.time.set_timer(self.SPWNGRUNT, 500)
-                pygame.time.set_timer(self.SPWNASTEROID, 1200)
-                pygame.time.set_timer(self.SPWNGRUNTFORM, 6000)
-                pygame.time.set_timer(self.SPWNBOMBER, 3000)
-                self.player.powerup = "none"
+                pygame.time.set_timer(self.SPWNGRUNTFORM, 3000)
+                pygame.time.set_timer(self.SPWNBOMBER, 8000)
+
+        def stageFour(self):
+		print("STAGE 4. GO!")
+                pygame.time.set_timer(self.STAGEFOUR, 0)
+                pygame.time.set_timer(self.SPWNGRUNTFORM, 0)
+                pygame.time.set_timer(self.SPWNBOMBER, 0)
+                pygame.time.set_timer(self.SPWNASTEROID, 1000)
 
 	def spawnAsteroid(self):
                 graphics = 'asteroid.png'
@@ -159,12 +169,16 @@ class Game(object):
 		graphics = ['grunt1.gif', 'laser1.bmp']
 		projectile = "lasers"
 		xvelocity = 0
-		yvelocity = 3
+		yvelocity = random.randint(2, 5)
 		xposition = random.randint(50, 350)
 		yposition = -50
 		weaponEquiped = True
-		weaponStyle = "single"
-		movementStyle = "sine"
+		movementStyle = "straight"
+
+		if random.randint(0, 1) == 0:
+			weaponStyle = "single"
+		else:
+			weaponStyle = "spray"
 
 		self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 
@@ -173,20 +187,20 @@ class Game(object):
 		projectile = "lasers"
 		xvelocity = 0
 		yvelocity = 3
-		formation = 0
 
 		# Back-to-Back Formation
 		if formation == 0:
 			distance = -35
-			xposition = 0
+			xposition = random.randint(50, 300)
 			yposition = distance
 			weaponEquiped = False
 			weaponStyle = "single"
-			movementStyle = "sine"
+			movementStyle = "straight"
 			i = 0
 			while i <= amount:
 				yposition += distance
-				self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
+				self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))				
+				self.enemySprites.add(Grunt((xposition + 35), yposition, (xvelocity), yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 				i += 1
 
 		# Side-to-Side Formation
@@ -320,8 +334,8 @@ class Grunt(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		self.graphics = graphics
 		self.image, self.rect = loadImage(self.graphics[0])
-		#self.rect.centerx = xposition
-		#self.rect.centery = yposition
+		self.rect.centerx = xposition
+		self.rect.centery = yposition
 		self.xposition = xposition
 		self.yposition = yposition
 		self.xvelocity = xvelocity
@@ -389,6 +403,18 @@ class Grunt(pygame.sprite.Sprite):
 			#self.step += 0.008
 			self.step += 0.09
 			self.step %= 2 * math.pi
+
+                elif self.movementStyle == "inAndOut":
+                        print("Y Position: %d" % self.rect.centery)
+                        print("X Position: %d" % self.rect.centerx)
+			self.amplitude = 200
+                        xposition = 1 * math.sin(self.step) * self.amplitude
+                        #self.yposition += 3
+                        self.rect.center = (int(xposition), int(self.yposition) + 200 + 20)
+                        #self.rect.move_ip(self.xvelocity, self.yvelocity)
+                        #self.step += 0.008
+                        self.step += 0.03
+                        self.step %= 2 * math.pi
 
 	def update(self):
 		self.fly()
