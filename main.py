@@ -16,9 +16,7 @@ class Game(object):
 		self.STAGEONE = pygame.USEREVENT + 4
 		self.STAGETWO = pygame.USEREVENT + 5
 		self.STAGETHREE = pygame.USEREVENT + 6
-		self.STAGEFOUR = pygame.USEREVENT + 7
-		self.STAGEFIVE = pygame.USEREVENT + 8
-		self.STAGESIX = pygame.USEREVENT + 9
+		self.SPWNBATTLECRUISER = pygame.USEREVENT + 7
 
         def mainLoop(self):
                 self.clock = pygame.time.Clock()
@@ -59,6 +57,8 @@ class Game(object):
 				self.spawnBomber()
 			if event.type == self.SPWNASTEROID:
 				self.spawnAsteroid()
+			if event.type == self.SPWNBATTLECRUISER:
+				self.spawnBattlecruiser()
 
 			# Stage Events
 			if event.type == self.STAGEONE:
@@ -67,10 +67,6 @@ class Game(object):
 				self.stageTwo()
 			if event.type == self.STAGETHREE:
 				self.stageThree()
-			if event.type == self.STAGEFOUR:
-				self.stageFour()
-			if event.type == self.STAGEFIVE:
-				self.stageFive()
 
 		# Player Movement Events
 		key = pygame.key.get_pressed()
@@ -103,15 +99,14 @@ class Game(object):
 	# Define Stages
         def queueStageEvents(self):
                 pygame.time.set_timer(self.STAGEONE, 1000)
-                pygame.time.set_timer(self.STAGETWO, 30000)
-                pygame.time.set_timer(self.STAGETHREE, 60000)
-		pygame.time.set_timer(self.STAGEFOUR, 90000)
-		pygame.time.set_timer(self.STAGEFIVE, 150000)
+                #pygame.time.set_timer(self.STAGETWO, 30000)
+                #pygame.time.set_timer(self.STAGETHREE, 60000)
 
 	def stageOne(self):
 		print("STAGE 1. GO!")
 		pygame.time.set_timer(self.STAGEONE, 0)
-		pygame.time.set_timer(self.SPWNGRUNT, 600)
+		pygame.time.set_timer(self.SPWNGRUNT, 1000)
+		pygame.time.set_timer(self.SPWNBATTLECRUISER, 15000)
 
 	def stageTwo(self):
 		print("STAGE 2. GO!")
@@ -124,13 +119,6 @@ class Game(object):
                 pygame.time.set_timer(self.STAGETHREE, 0)
                 pygame.time.set_timer(self.SPWNGRUNTFORM, 3000)
                 pygame.time.set_timer(self.SPWNBOMBER, 8000)
-
-        def stageFour(self):
-		print("STAGE 4. GO!")
-                pygame.time.set_timer(self.STAGEFOUR, 0)
-                pygame.time.set_timer(self.SPWNGRUNTFORM, 0)
-                pygame.time.set_timer(self.SPWNBOMBER, 0)
-                pygame.time.set_timer(self.SPWNASTEROID, 1000)
 
 	def spawnAsteroid(self):
                 graphics = 'asteroid.png'
@@ -165,12 +153,29 @@ class Game(object):
 	
 		self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 
+	def spawnBattlecruiser(self):
+		graphics = ['battlecruiser.png', 'laser1.bmp']
+		projectile = "lasers"
+		xvelocity = 0
+		yvelocity = -1
+		xposition = random.randint(50, 350)
+		yposition = 680
+		weaponEquiped = True
+		movementStyle = "straight"
+
+		if random.randint(0, 1) == 0:
+			weaponStyle = "single"
+		else:
+			weaponStyle = "spray"
+
+		self.enemySprites.add(Battlecruiser(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
+
 	def spawnGrunt(self):
 		graphics = ['grunt1.gif', 'laser1.bmp']
 		projectile = "lasers"
 		xvelocity = 0
-		yvelocity = random.randint(2, 5)
-		xposition = random.randint(50, 350)
+		yvelocity = random.randint(2, 3)
+		xposition = random.randint(50, 320)
 		yposition = -50
 		weaponEquiped = True
 		movementStyle = "straight"
@@ -181,6 +186,13 @@ class Game(object):
 			weaponStyle = "spray"
 
 		self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
+
+		amount = random.randint(0, 2)
+		if amount == 1:
+			self.enemySprites.add(Grunt((xposition + 35), yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
+		elif amount == 2:
+			self.enemySprites.add(Grunt((xposition + 35), yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
+			self.enemySprites.add(Grunt((xposition + 70), yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 
 	def spawnGruntFormation(self, amount, formation):
 		graphics = ['grunt2.png', 'laser1.bmp']
@@ -329,7 +341,7 @@ class Debris(pygame.sprite.Sprite):
 	def update(self):
 		self.float()
 
-class Grunt(pygame.sprite.Sprite):
+class Battlecruiser(pygame.sprite.Sprite):
 	def __init__(self, xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquipped, fireType, movementStyle):
 		pygame.sprite.Sprite.__init__(self)
 		self.graphics = graphics
@@ -351,6 +363,40 @@ class Grunt(pygame.sprite.Sprite):
 		self.step = 0
 		self.amplitude = 50
 
+	def fly(self):
+                #if self.rect.top > 600 or self.rect.right < -20 or self.rect.left > 420:
+                #        self.kill()
+
+                if self.movementStyle == "straight":
+                        self.rect.move_ip(self.xvelocity, self.yvelocity)
+
+	def update(self):
+		self.fly()
+
+
+class Grunt(pygame.sprite.Sprite):
+	def __init__(self, xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquipped, fireType, movementStyle):
+		pygame.sprite.Sprite.__init__(self)
+		self.graphics = graphics
+		self.image, self.rect = loadImage(self.graphics[0])
+		self.rect.centerx = xposition
+		self.rect.centery = yposition
+		self.xposition = xposition
+		self.yposition = yposition
+		self.xvelocity = xvelocity
+		self.yvelocity = yvelocity
+		self.projectile = projectile
+		self.shooting = False
+		self.yLaserVelocity = (self.yvelocity + 1)
+		self.weaponSpeed = 80
+		self.weaponCharge = 0
+		self.weaponEquipped = weaponEquipped
+		self.fireType = fireType
+		self.movementStyle = movementStyle
+		self.step = 0
+		self.amplitude = 50
+		self.backup = random.randint(0, 1)
+
 		if self.weaponEquipped:
 			if self.projectile == "lasers":
 				self.decideIfShooting()
@@ -359,6 +405,10 @@ class Grunt(pygame.sprite.Sprite):
 				self.shooting = True
 
 	def decideIfShooting(self):
+		if self.backup > 0:
+			self.shooting = False
+			return
+
 		i = random.randint(0, 10)
 		if i > 6:
 			self.shooting = True
@@ -419,6 +469,10 @@ class Grunt(pygame.sprite.Sprite):
 	def update(self):
 		self.fly()
 		self.prepareWeapon()
+		
+		if self.backup > 0 and self.rect.centery > 400:
+			self.xvelocity = random.randint(-2, 2)
+			self.yvelocity = -2
 
 if __name__ == "__main__":
 	game = Game()
