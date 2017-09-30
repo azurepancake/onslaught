@@ -52,7 +52,7 @@ class Game(object):
 			if event.type == self.SPWNGRUNT:
 				self.spawnGrunt()
 			if event.type == self.SPWNGRUNTFORM:
-				self.spawnGruntFormation(5, random.randint(0, 2))
+				self.spawnGruntFormation(5, random.randint(0, 3))
 			if event.type == self.SPWNBOMBER:
 				self.spawnBomber()
 			if event.type == self.SPWNASTEROID:
@@ -105,8 +105,9 @@ class Game(object):
 	def stageOne(self):
 		print("STAGE 1. GO!")
 		pygame.time.set_timer(self.STAGEONE, 0)
-		pygame.time.set_timer(self.SPWNGRUNT, 1000)
-		pygame.time.set_timer(self.SPWNBATTLECRUISER, 15000)
+		pygame.time.set_timer(self.SPWNGRUNT, 1200)
+		pygame.time.set_timer(self.SPWNGRUNTFORM, 13000)
+		pygame.time.set_timer(self.SPWNBOMBER, 20000)
 
 	def stageTwo(self):
 		print("STAGE 2. GO!")
@@ -199,6 +200,7 @@ class Game(object):
 		projectile = "lasers"
 		xvelocity = 0
 		yvelocity = 3
+		#formation = 7
 
 		# Back-to-Back Formation
 		if formation == 0:
@@ -212,11 +214,28 @@ class Game(object):
 			while i <= amount:
 				yposition += distance
 				self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))				
-				self.enemySprites.add(Grunt((xposition + 35), yposition, (xvelocity), yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
+				#self.enemySprites.add(Grunt((xposition + 35), yposition, (xvelocity), yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
+				i += 1
+
+		# Back-to-Back Formation
+		if formation == 1:
+			distance = -35
+			xposition = distance
+			yposition = random.randint(50, 400)
+			xvelocity = 3
+			yvelocity = 0
+			weaponEquiped = True
+			weaponStyle = "single"
+			movementStyle = "straight"
+			i = 0
+			while i <= amount:
+				xposition += distance
+				self.enemySprites.add(Grunt(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))				
+				#self.enemySprites.add(Grunt((xposition + 35), yposition, (xvelocity), yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 				i += 1
 
 		# Side-to-Side Formation
-		if formation == 1:
+		if formation == 2:
 			distance = 55
 			xposition = 5
 			yposition = -10
@@ -230,7 +249,7 @@ class Game(object):
 				i += 1
 
 		# Slash Formation			
-                if formation == 2:
+                if formation == 3:
                         distance = 50
                         xposition = 25
                         yposition = -10
@@ -354,8 +373,8 @@ class Battlecruiser(pygame.sprite.Sprite):
 		self.yvelocity = yvelocity
 		self.projectile = projectile
 		self.shooting = False
-		self.yLaserVelocity = (self.yvelocity + 1)
-		self.weaponSpeed = 80
+		self.yLaserVelocity = (self.yvelocity)
+		self.weaponSpeed = 150
 		self.weaponCharge = 0
 		self.weaponEquipped = weaponEquipped
 		self.fireType = fireType
@@ -370,8 +389,27 @@ class Battlecruiser(pygame.sprite.Sprite):
                 if self.movementStyle == "straight":
                         self.rect.move_ip(self.xvelocity, self.yvelocity)
 
+	def fire(self):
+		self.weaponCharge += 1
+
+		if self.weaponCharge == self.weaponSpeed:
+			#self.yLaserVelocity -= 2
+
+			enemyLaserSprites.add(Projectile(self.rect.center, (self.yLaserVelocity - 3), 0, self.graphics[1]))
+			enemyLaserSprites.add(Projectile(self.rect.center, (self.yLaserVelocity - 2), -2, self.graphics[1]))
+                        enemyLaserSprites.add(Projectile(self.rect.center, (self.yLaserVelocity - 2), 2, self.graphics[1]))
+			enemyLaserSprites.add(Projectile(self.rect.center, 0, 2, self.graphics[1]))
+			enemyLaserSprites.add(Projectile(self.rect.center, (self.yLaserVelocity + 4), 0, self.graphics[1]))
+                        enemyLaserSprites.add(Projectile(self.rect.center, (self.yLaserVelocity + 2), -2, self.graphics[1]))
+                        enemyLaserSprites.add(Projectile(self.rect.center, (self.yLaserVelocity + 2), 2, self.graphics[1]))
+			enemyLaserSprites.add(Projectile(self.rect.center, 0, -2, self.graphics[1]))
+
+			self.weaponCharge = 0
+			self.yLaserVelocity = self.yvelocity
+
 	def update(self):
 		self.fly()
+		self.fire()
 
 
 class Grunt(pygame.sprite.Sprite):
@@ -387,7 +425,8 @@ class Grunt(pygame.sprite.Sprite):
 		self.yvelocity = yvelocity
 		self.projectile = projectile
 		self.shooting = False
-		self.yLaserVelocity = (self.yvelocity + 1)
+		#self.yLaserVelocity = (self.yvelocity + 1)
+		self.yLaserVelocity = 3
 		self.weaponSpeed = 80
 		self.weaponCharge = 0
 		self.weaponEquipped = weaponEquipped
@@ -401,7 +440,8 @@ class Grunt(pygame.sprite.Sprite):
 			if self.projectile == "lasers":
 				self.decideIfShooting()
 			if self.projectile == "bombs":
-				self.weaponSpeed = random.randint(25, 30)
+				self.yLaserVelocity = 3
+				self.weaponSpeed = 30
 				self.shooting = True
 
 	def decideIfShooting(self):
@@ -429,6 +469,7 @@ class Grunt(pygame.sprite.Sprite):
 				self.yLaserVelocity = self.yvelocity
 
         def fireSingle(self):
+		self.yLaserVelocity = 4
                 enemyLaserSprites.add(Projectile(self.rect.center, self.yLaserVelocity, 0, self.graphics[1]))
 
 	def fireSpray(self):
@@ -437,7 +478,7 @@ class Grunt(pygame.sprite.Sprite):
                 enemyLaserSprites.add(Projectile(self.rect.center, self.yLaserVelocity, -2, self.graphics[1]))
 	
 	def fly(self):
-                if self.rect.top > 600 or self.rect.right < -20 or self.rect.left > 420:
+                if self.rect.top > 600 or self.rect.right < -300 or self.rect.left > 420:
                         self.kill()
 
                 elif self.movementStyle == "straight":
@@ -473,6 +514,10 @@ class Grunt(pygame.sprite.Sprite):
 		if self.backup > 0 and self.rect.centery > 400:
 			self.xvelocity = random.randint(-2, 2)
 			self.yvelocity = -2
+			self.yLaserVelocity = 3
+			self.shooting = True
+			self.weaponSpeed = 43
+			self.fireType = "single"			
 
 if __name__ == "__main__":
 	game = Game()
