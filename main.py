@@ -13,10 +13,11 @@ class Game(object):
 		self.SPWNGRUNTFORM = pygame.USEREVENT + 1
 		self.SPWNBOMBER = pygame.USEREVENT + 2
 		self.SPWNASTEROID = pygame.USEREVENT + 3
-		self.STAGEONE = pygame.USEREVENT + 4
-		self.STAGETWO = pygame.USEREVENT + 5
-		self.STAGETHREE = pygame.USEREVENT + 6
-		self.SPWNBATTLECRUISER = pygame.USEREVENT + 7
+		self.SPWNBATTLECRUISER = pygame.USEREVENT + 4
+		self.STAGEONE = pygame.USEREVENT + 5
+		self.STAGETWO = pygame.USEREVENT + 6
+		self.STAGETHREE = pygame.USEREVENT + 7
+		self.STAGEFOUR = pygame.USEREVENT + 8
 
         def mainLoop(self):
                 self.clock = pygame.time.Clock()
@@ -99,27 +100,30 @@ class Game(object):
 	# Define Stages
         def queueStageEvents(self):
                 pygame.time.set_timer(self.STAGEONE, 1000)
-                #pygame.time.set_timer(self.STAGETWO, 30000)
-                #pygame.time.set_timer(self.STAGETHREE, 60000)
+                pygame.time.set_timer(self.STAGETWO, 60000)
+                pygame.time.set_timer(self.STAGETHREE, 120000)
 
 	def stageOne(self):
 		print("STAGE 1. GO!")
 		pygame.time.set_timer(self.STAGEONE, 0)
 		pygame.time.set_timer(self.SPWNGRUNT, 1200)
 		pygame.time.set_timer(self.SPWNGRUNTFORM, 13000)
-		pygame.time.set_timer(self.SPWNBOMBER, 20000)
+
 
 	def stageTwo(self):
 		print("STAGE 2. GO!")
 		pygame.time.set_timer(self.STAGETWO, 0)
-		pygame.time.set_timer(self.SPWNGRUNT, 0)
-		pygame.time.set_timer(self.SPWNGRUNTFORM, 2500)
+		pygame.time.set_timer(self.SPWNGRUNT, 1000)
+		pygame.time.set_timer(self.SPWNGRUNTFORM, 9000)
+		pygame.time.set_timer(self.SPWNBOMBER, 3500)
 
 	def stageThree(self):
 		print("STAGE 3. GO!")
                 pygame.time.set_timer(self.STAGETHREE, 0)
-                pygame.time.set_timer(self.SPWNGRUNTFORM, 3000)
-                pygame.time.set_timer(self.SPWNBOMBER, 8000)
+		pygame.time.set_timer(self.SPWNASTEROID, 1500)
+		pygame.time.set_timer(self.SPWNGRUNT, 1100)
+		pygame.time.set_timer(self.SPWNGRUNTFORM, 11000)
+		pygame.time.set_timer(self.SPWNBOMBER, 3500)
 
 	def spawnAsteroid(self):
                 graphics = 'asteroid.png'
@@ -128,12 +132,6 @@ class Game(object):
                 xposition = random.randint(50, 350)
                 yposition = 0
                 self.debrisSprites.add(Debris(xposition, yposition, xvelocity, yvelocity, graphics))
-
-        def spawnLaser(self):
-                graphics = 'homing-laser.png'
-                xposition = 300
-                yposition = 400
-                enemyLaserSprites.add(HomingLaser(xposition, yposition, graphics, self.player.rect.centerx, self.player.rect.centery))
 
 	def spawnBomber(self):
 		graphics = ['bomber1.png', 'bomb1.png']
@@ -172,7 +170,7 @@ class Game(object):
 		self.enemySprites.add(Battlecruiser(xposition, yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 
 	def spawnGrunt(self):
-		graphics = ['grunt1.gif', 'laser1.bmp']
+		graphics = ['grunt1.gif', 'laser2.png']
 		projectile = "lasers"
 		xvelocity = 0
 		yvelocity = random.randint(2, 3)
@@ -196,7 +194,7 @@ class Game(object):
 			self.enemySprites.add(Grunt((xposition + 70), yposition, xvelocity, yvelocity, graphics, projectile, weaponEquiped, weaponStyle, movementStyle))
 
 	def spawnGruntFormation(self, amount, formation):
-		graphics = ['grunt2.png', 'laser1.bmp']
+		graphics = ['grunt2.png', 'laser2.png']
 		projectile = "lasers"
 		xvelocity = 0
 		yvelocity = 3
@@ -221,7 +219,7 @@ class Game(object):
 		if formation == 1:
 			distance = -35
 			xposition = distance
-			yposition = random.randint(50, 400)
+			yposition = random.randint(50, 550)
 			xvelocity = 3
 			yvelocity = 0
 			weaponEquiped = True
@@ -274,7 +272,7 @@ class Game(object):
 			self.playerSprites = pygame.sprite.RenderPlain((self.player))
 
 		if pygame.sprite.groupcollide(enemyLaserSprites, self.playerSprites, 1, 1):
-			self.player.reset()
+			self.player.takeDmg()
 			self.playerSprites = pygame.sprite.RenderPlain((self.player))
 
                 if pygame.sprite.groupcollide(self.debrisSprites, self.playerSprites, 1, 1):
@@ -285,13 +283,14 @@ class Player(pygame.sprite.Sprite):
 	def __init__(self, screenWidth, screenHeight):
 		pygame.sprite.Sprite.__init__(self)
 		self.image, self.rect = loadImage('ship1.bmp')
-		self.projectile = 'laser1.bmp'
+		self.projectile = 'laser3.png'
 		self.rect.centerx = 200
 		self.rect.centery = 535
 		self.velocity = 3
 		self.yLaserVelocity = -18
 		self.screenWidth = screenWidth
 		self.screenHeight = screenHeight
+		self.shield = 5
 		self.powerup = None
 
 	def flyUp(self):
@@ -323,6 +322,11 @@ class Player(pygame.sprite.Sprite):
 			laserSprites.add(Projectile(self.rect.center, self.yLaserVelocity, -3, self.projectile))
 			laserSprites.add(Projectile(self.rect.center, self.yLaserVelocity, 3, self.projectile))
 
+	def takeDmg(self):
+		self.shield -= 1
+		if self.shield <= 0:
+			self.reset()
+
 	def reset(self):
                 self.rect.centerx = 200
                 self.rect.centery = 535
@@ -340,6 +344,8 @@ class Projectile(pygame.sprite.Sprite):
 			self.kill()
 		else:
 			self.rect.move_ip(self.xvelocity, self.yvelocity)	
+
+
 	
 class Debris(pygame.sprite.Sprite):
 	def __init__(self, xposition, yposition, xvelocity, yvelocity, graphics):
@@ -348,14 +354,27 @@ class Debris(pygame.sprite.Sprite):
 		self.image, self.rect = loadImage(self.graphics)
 		self.rect.centerx = xposition
 		self.rect.centery = yposition
+		self.xposition = xposition
+		self.yposition = yposition
 		self.xvelocity = xvelocity
 		self.yvelocity = yvelocity
+		self.step = 0
+		self.amplitude = 200
 
 	def float(self):
                 if self.rect.top > 600:
                         self.kill()
                 else:
                         self.rect.move_ip(self.xvelocity, self.yvelocity)
+
+		xposition = 1 * math.sin(self.step) * self.amplitude
+		self.yposition += 3
+		self.rect.center = (int(xposition) + 200 + 20, int(self.yposition))
+		#self.rect.move_ip(self.xvelocity, self.yvelocity)
+		#self.step += 0.008
+		self.step += 0.04
+		self.step %= 2 * math.pi
+
 
 	def update(self):
 		self.float()
